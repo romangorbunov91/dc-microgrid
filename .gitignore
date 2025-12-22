@@ -1,0 +1,10 @@
+# Ignore everything in the repo root.
+/*
+
+!.gitignore
+
+!/README.md
+!/agents.py
+!test_agents.ipynb
+
+**/__pycache__/
