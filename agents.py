@@ -1,37 +1,29 @@
 class PowerSource:
-    def __init__(self, Rdroop, Uinit, dt, tau=None):
+    def __init__(self, Rdroop, Uinit=0.0, beta=1.0):
         self.Rdroop = Rdroop
-        self.u_int_prev = Uinit
-        if tau is None:
-            self.alpha = None
-        else:
-            self.alpha = dt/tau
+        self.u = Uinit
+        self.beta = beta
 
-    def step(self, i, Uref):
-        if self.alpha is None:
-            u_int = Uref
-        else:
-            u_int = self.alpha * Uref + (1 - self.alpha) * self.u_int_prev
-            self.u_int_prev = u_int
-        return u_int - i * self.Rdroop
+    def step(self, u, Uref):
+        self.u = self.beta * Uref + (1 - self.beta) * self.u
+        return (self.u - u) / self.Rdroop
 
 class PowerLoad:
-    def __init__(self, Unom, Pnom, Rline, type, tau=None):
-        
-        self.Rline = Rline
-        self.tau = tau
-        self.u_int_prev = 0.0
-        
-        match type:
-            case 'current':
-                self.I = Pnom/Unom
-            case 'res':
-                self.R = Unom**2 / Pnom
+    def __init__(self, Unom, Pnom, Rline, Iinit=0.0, beta=1.0):      
+        self.R = Unom**2 / Pnom
+        self.Rline = Rline 
+        self.beta = beta
+        self.i = Iinit
 
-    def step(self, u, dt):
-        if self.tau is not None:
-            self.u_prev += (self.Uref - self.us_prev) * dt / self.tau
-            u_int = self.u_int_prev
-        else:
-            u_s = self.Uref
-        return u - i * self.Rdroop
+    def step(self, u):
+        self.i = self.beta * u / (self.Rline + self.R) + (1 - self.beta) * self.i
+        return self.i
+    
+class PowerBus:
+    def __init__(self, Uinit=0.0, beta=1.0):      
+        self.beta = beta
+        self.u = Uinit
+
+    def step(self, i):
+        self.u += self.beta * i
+        return self.u
