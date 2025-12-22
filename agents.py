@@ -9,14 +9,13 @@ class PowerSource:
         return (self.u - u) / self.Rdroop
 
 class PowerLoad:
-    def __init__(self, Unom, Pnom, Rline, Iinit=0.0, beta=1.0):      
+    def __init__(self, Unom, Pnom, Iinit=0.0, beta=1.0):      
         self.R = Unom**2 / Pnom
-        self.Rline = Rline 
         self.beta = beta
         self.i = Iinit
 
     def step(self, u):
-        self.i = self.beta * u / (self.Rline + self.R) + (1 - self.beta) * self.i
+        self.i = self.beta * u / self.R + (1 - self.beta) * self.i
         return self.i
     
 class PowerBus:
