@@ -4,7 +4,9 @@
 !.gitignore
 
 !/README.md
-!/agents.py
+!/models.py
 !test_agents.ipynb
+!simulation.ipynb
+!general_func.py
 
 **/__pycache__/
