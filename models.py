@@ -15,7 +15,7 @@ class PowerLoad:
         self.i = Iinit
 
     def step(self, u, P):
-        R = P / self.Unom
+        R = self.Unom**2 / P
         self.i = self.beta * u / R + (1 - self.beta) * self.i
         return self.i
     
