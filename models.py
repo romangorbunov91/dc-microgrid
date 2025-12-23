@@ -9,13 +9,14 @@ class PowerSource:
         return (self.u - u) / self.Rdroop
 
 class PowerLoad:
-    def __init__(self, Unom, Pnom, Iinit=0.0, beta=1.0):      
-        self.R = Unom**2 / Pnom
+    def __init__(self, Unom, Iinit=0.0, beta=1.0):      
+        self.Unom = Unom
         self.beta = beta
         self.i = Iinit
 
-    def step(self, u):
-        self.i = self.beta * u / self.R + (1 - self.beta) * self.i
+    def step(self, u, P):
+        R = P / self.Unom
+        self.i = self.beta * u / R + (1 - self.beta) * self.i
         return self.i
     
 class PowerBus:
@@ -37,7 +38,6 @@ class PowerGrid:
                  beta_source_set,
                  N_LOAD,
                  Uload_set,
-                 Pload_set,
                  beta_load_set):      
         
         self.bus = PowerBus(
@@ -56,12 +56,12 @@ class PowerGrid:
         self.loads = [
             PowerLoad(
                 Unom=Uload_set[idx],
-                Pnom=Pload_set[idx],
                 beta=beta_load_set[idx]
                 ) for idx in range(N_LOAD)
         ]
         self.Ubus_prev = Ubus_init
-    def step(self, N_STEPS, Uref_set):
+
+    def step(self, N_STEPS, Uref_set, Pload_set):
         source_currents = np.zeros((N_STEPS, len(self.sources)))
         load_currents = np.zeros((N_STEPS, len(self.loads)))
         bus_voltage = np.zeros(N_STEPS)
@@ -70,19 +70,19 @@ class PowerGrid:
             if n == 0:
                 source_currents[n] = [source.step(u=self.Ubus_prev, Uref=Uref_set[idx])
                                 for idx, source in enumerate(self.sources)]
-                load_currents[n] = [load.step(u=self.Ubus_prev)
-                                for load in self.loads]
+                load_currents[n] = [load.step(u=self.Ubus_prev, P=Pload_set[idx])
+                           for idx, load in enumerate(self.loads)]
             else:
                 source_currents[n] = [source.step(u=bus_voltage[n-1], Uref=Uref_set[idx])
                                 for idx, source in enumerate(self.sources)]
-                load_currents[n] = [load.step(u=bus_voltage[n-1])
-                                for load in self.loads]
+                load_currents[n] = [load.step(u=bus_voltage[n-1], P=Pload_set[idx])
+                           for idx, load in enumerate(self.loads)]
             
             bus_voltage[n] = self.bus.step(source_currents[n].sum() - load_currents[n].sum())
         
         # Save last bus voltage value as an initial for next '.step'.
         self.Ubus_prev = bus_voltage[-1]
-        return bus_voltage, source_currents, load_currents
+        return bus_voltage, source_currents, load_currents, bus_voltage[-1], source_currents[-1], load_currents[-1]
 
 
 import torch
