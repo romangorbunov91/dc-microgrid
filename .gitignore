@@ -3,8 +3,9 @@
 
 !.gitignore
 
-!/README.md
-!/models.py
+!README.md
+!power_models.py
+!agent_models.py
 !test_agents.ipynb
 !simulation.ipynb
 !general_func.py
