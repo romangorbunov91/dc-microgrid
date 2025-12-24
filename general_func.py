@@ -1,6 +1,6 @@
 import numpy as np
 
-def compute_reward(voltages, currents, count, tau, U_ref):
+def reward_func(voltages, currents, count, tau, U_ref):
     avg_U = np.mean(voltages)
     eU = abs(avg_U - U_ref) / U_ref
     I_avg = np.mean(currents)
