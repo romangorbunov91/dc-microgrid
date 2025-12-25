@@ -12,14 +12,17 @@ class Actor(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, action_dim * 2)
+            #nn.Linear(hidden_dim, action_dim * 2)
+            nn.Linear(hidden_dim, action_dim)
+            
         )
         self.action_dim = action_dim
 
     def forward(self, obs):
-        out = self.net(obs)
-        mean, log_std = out[:, :self.action_dim], out[:, self.action_dim:]
-        log_std = torch.clamp(log_std, -20, 2)
+        mean = self.net(obs.float())
+        #mean, log_std = out[:, :self.action_dim], out[:, self.action_dim:]
+        #log_std = torch.clamp(log_std, -20, 2)
+        log_std = torch.tensor(1.1, dtype=torch.float32)
         return mean, log_std
 
     def get_action(self, obs, deterministic=False):
@@ -47,4 +50,4 @@ class Critic(nn.Module):
         )
 
     def forward(self, state):
-        return self.net(state).squeeze(-1)
+        return self.net(state)#.squeeze(-1)

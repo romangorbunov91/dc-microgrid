@@ -1,13 +1,14 @@
 import numpy as np
 
-def reward_func(voltages, currents, count, tau, U_ref):
-    avg_U = np.mean(voltages)
-    eU = abs(avg_U - U_ref) / U_ref
-    I_avg = np.mean(currents)
+def reward_func(bus_voltage, source_currents, Ubus_nom, count):
+    tau = 20
+
+    eU = abs(bus_voltage - Ubus_nom) / Ubus_nom
+    I_avg = np.mean(source_currents)
     if abs(I_avg) < 1e-6:
         eI = 0.0
     else:
-        eI = np.sum(np.abs((currents - I_avg) / I_avg))
+        eI = np.sum(np.abs((source_currents - I_avg) / I_avg))
 
     alpha1, beta1 = 8.0, 0.5
     alpha2, beta2 = 5.0, 1.0
